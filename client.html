@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <script src="/socket.io/socket.io.js"></script>
+      <div id="one">
+
+      </div>
+      <script type ="text/javascript">
+
+// used https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt for popup below
+
+let txt;
+  let person = prompt("Please enter your name:", "Nickname");
+  if (person == null || person == "") {
+    txt = "User cancelled the prompt.";
+  } else {
+    txt = "Hello " + person + "! You have joined.";
+  }
+//   document.getElementById("demo").innerHTML = txt;
+// alert("hi");
+document.getElementById("one").appendChild(document.createTextNode(txt));
+      var socketio = io.connect();
+        var currentroom = "lobby";
+// socketio.emit("message_to_server", {name:currentroom});
+      socketio.on("message_to_client",function(data) {
+         //Append an HR thematic break and the escaped HTML of the new message
+         document.getElementById("chatlog").appendChild(document.createElement("hr"));
+         document.getElementById("chatlog").appendChild(document.createTextNode(data["user"] + ": " + data['message']));
+      });
+
+      socketio.on("message_to_client2",function(data) {
+        console.log("Printing message!");
+        currentroom = data['name'];
+        document.getElementById("chatlog").appendChild(document.createElement("hr"));
+        document.getElementById("chatlog").appendChild(document.createTextNode(data['message'] + data['name'] + " has been created"));
+    });
+
+      function sendMessage(){
+         var msg = document.getElementById("message_input").value;
+         socketio.emit("message_to_server", {message:msg, user:person, name:currentroom});}
+
+
+      function createroom(){
+          var roomname = document.getElementById("newchatname").value;
+          console.log("New room created: " + roomname);
+          socketio.emit("newroom", {name:roomname});
+      }
+
+      </script>
+   </head>
+   <body>
+      <input type="text" id="message_input"/>
+      <button onclick="sendMessage()">send</button>
+
+      <input type="text" id="newchatname"/>
+      <button onclick="createroom()">create</button>
+
+      <div id="chatlog"></div>
+
+
+   </body>
+</html>
