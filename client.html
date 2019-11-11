@@ -9,6 +9,14 @@
 
 // used https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt for popup below
 
+
+let room = {
+    roomName: "room",
+    users: [],
+    creator: "ron"
+};
+
+
 let txt;
   let person = prompt("Please enter your name:", "Nickname");
   if (person == null || person == "") {
@@ -21,7 +29,19 @@ let txt;
 document.getElementById("one").appendChild(document.createTextNode(txt));
       var socketio = io.connect();
         var currentroom = "lobby";
+        var newroom = [];
+        var currentnewroom = 0;
 // socketio.emit("message_to_server", {name:currentroom});
+
+// for(i=0; i<currentnewroom; i++){
+//     let join_btn = document.createElement("button");
+//         join_btn.setAttribute("id", newroom);
+//         join_btn.setAttribute("value", newroom);
+//         join_btn.appendChild(document.createTextNode("Join " + newroom));
+//         document.getElementById("rooms").appendChild(join_btn);
+//         join_btn.addEventListener('click', joinRoom, false);
+// }
+
       socketio.on("message_to_client",function(data) {
          //Append an HR thematic break and the escaped HTML of the new message
          document.getElementById("chatlog").appendChild(document.createElement("hr"));
@@ -32,8 +52,42 @@ document.getElementById("one").appendChild(document.createTextNode(txt));
         console.log("Printing message!");
         currentroom = data['name'];
         document.getElementById("chatlog").appendChild(document.createElement("hr"));
-        document.getElementById("chatlog").appendChild(document.createTextNode(data['message'] + data['name'] + " has been created"));
+        document.getElementById("chatlog").appendChild(document.createTextNode(data['message'] + data['name'] + " has been created. You are now in this chatroom."));
+        
+        
     });
+
+    //for joining chatrooms:
+    socketio.on("message_to_client3",function(data) {
+
+        currentroom = data['name'];
+        document.getElementById("chatlog").appendChild(document.createElement("hr"));
+        document.getElementById("chatlog").appendChild(document.createTextNode("You have joined the chat room called: " + data['name']));
+        while(document.getElementById("usersinroom").firstChild!=null){
+            document.getElementById("usersinroom").removeChild(document.getElementById("usersinroom").lastChild);
+        }
+        for(i=0; i<data["users"].length; i++){
+            document.getElementById("usersinroom").appendChild(document.createTextNode(data["users"][i]));
+        }
+    });
+
+    socketio.on("joinroombtn",function(data) {
+        let join_btn = document.createElement("button");
+        join_btn.setAttribute("id", data['name']);
+        join_btn.setAttribute("value", data['name']);
+        join_btn.appendChild(document.createTextNode("Join " + data['name']));
+        document.getElementById("rooms").appendChild(join_btn);
+        newroom = data['name'];
+        join_btn.addEventListener('click', joinRoom, false);
+
+    });
+
+    // socketio.on("addexistingroom",function(data) {
+
+
+
+
+    // });
 
       function sendMessage(){
          var msg = document.getElementById("message_input").value;
@@ -41,10 +95,16 @@ document.getElementById("one").appendChild(document.createTextNode(txt));
 
 
       function createroom(){
-          var roomname = document.getElementById("newchatname").value;
-          console.log("New room created: " + roomname);
-          socketio.emit("newroom", {name:roomname});
+          var createroomname = document.getElementById("newchatname").value;
+          console.log("New room created: " + createroomname);
+          socketio.emit("newroom", {name:createroomname, creator:person});
       }
+
+      function joinRoom(){
+        socketio.emit("joinroom", {name:newroom, user:person});
+        //currentnewroom++;
+    }
+      
 
       </script>
    </head>
@@ -56,6 +116,24 @@ document.getElementById("one").appendChild(document.createTextNode(txt));
       <button onclick="createroom()">create</button>
 
       <div id="chatlog"></div>
+
+      <br>
+      Users in your room:  
+      <br>
+
+      <div id="usersinroom"> 
+            
+        </div>
+
+
+      <div id="rooms"> 
+          <br>
+Join any of these chatrooms:
+<br>
+      </div>
+
+      
+
 
 
    </body>
