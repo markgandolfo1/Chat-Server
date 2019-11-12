@@ -50,8 +50,8 @@ for(i=0; i<currentnewroom; i++){
 	socket.on('message_to_server', function(data) {
 		// This callback runs when the server receives a new message from the client.
 		
-        console.log("message: " + data["message"]); // log it to the Node.JS output
-        console.log("data['name']: " + data["name"]); 
+        console.log("sendingroomis" + data["name"]);
+
         if(data["name"]!="lobby"){
             console.log("should be a private room message")
             io.sockets.in(data["name"]).emit("message_to_client",{message:data['message'], user:data['user']}); 
@@ -81,6 +81,10 @@ for(i=0; i<currentnewroom; i++){
         currentnewroom++;
        
         io.sockets.in("lobby").emit("joinroombtn",{name:data["name"]});
+        //console.log("#: " + rooms[currentnewroom].users.length);
+       //******** */
+        //io.sockets.in(data["name"]).emit("message_to_client3",{name:data["name"], users:data["creator"]});
+        io.sockets.in(data["name"]).emit("message_to_client3",{name:data["name"], users:[data["creator"]]});
 
         // rooms[currentnewroom] = data["name"];
         // currentnewroom++;
@@ -103,5 +107,21 @@ for(i=0; i<currentnewroom; i++){
         }
 
     });
-    
+
+    socket.on('leaveroom', function(data) {
+        socket.leave(socket.room);
+        socket.join("lobby");
+        for(i=0; i<currentnewroom; i++){
+            if(rooms[i].roomName==data["name"] && data["user"]!=null){
+                rooms[i].users.splice(i,1);
+                io.sockets.in("lobby").emit("message_to_client_leavechat",{name:data["name"], users:rooms[i].users});
+                for(j=0;j<rooms[i].users.length; j++){
+                    console.log("users are " + rooms[i].users[j]);
+                }
+                io.sockets.in(data["name"]).emit("message_to_client_notleavechat",{name:data["name"], users:rooms[i].users});
+
+            }
+        }
+
+    });
 });

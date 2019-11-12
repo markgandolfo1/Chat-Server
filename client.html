@@ -5,16 +5,21 @@
       <div id="one">
 
       </div>
+
+      <input type='submit' value='Leave Room' id='leave_btn'/>
+
       <script type ="text/javascript">
 
 // used https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt for popup below
 
 
-let room = {
-    roomName: "room",
-    users: [],
-    creator: "ron"
-};
+document.getElementById("leave_btn").addEventListener("click", leaveRoom, false);
+
+// let room = {
+//     roomName: "room",
+//     users: [],
+//     creator: "ron"
+// };
 
 
 let txt;
@@ -66,9 +71,73 @@ document.getElementById("one").appendChild(document.createTextNode(txt));
         while(document.getElementById("usersinroom").firstChild!=null){
             document.getElementById("usersinroom").removeChild(document.getElementById("usersinroom").lastChild);
         }
+        let ul = document.createElement('ul');
+            ul.setAttribute("id", "list");
         for(i=0; i<data["users"].length; i++){
-            document.getElementById("usersinroom").appendChild(document.createTextNode(data["users"][i]));
+            console.log(i);
+            // document.getElementById("usersinroom").appendChild(document.createTextNode(data["users"][i]));
+
+            //if(i==0){
+            
+           // }
+            let li = document.createElement('li');
+            li.setAttribute("id", "bullet");
+            
+            li.appendChild(document.createTextNode(data["users"][i]));
+            ul.appendChild(li);
+            //let a = document.getElementById("bullet").appendChild(document.createTextNode(data["users"][i]));
+            //let b = document.getElementById("list").appendChild(a);
+            
         }
+        
+        document.getElementById("usersinroom").appendChild(ul);
+
+        
+    });
+    
+    socketio.on("message_to_client_leavechat",function(data) {
+        document.getElementById("chatlog").appendChild(document.createElement("hr"));
+        document.getElementById("chatlog").appendChild(document.createTextNode("You have left the chat room called: " + data['name']));
+
+        while(document.getElementById("usersinroom").firstChild!=null){
+            document.getElementById("usersinroom").removeChild(document.getElementById("usersinroom").lastChild);
+        }
+        let ul = document.createElement('ul');
+            ul.setAttribute("id", "list");
+        for(i=0; i<data["users"].length; i++){
+            console.log(i);
+    
+            let li = document.createElement('li');
+            li.setAttribute("id", "bullet");
+            
+            li.appendChild(document.createTextNode(data["users"][i]));
+            ul.appendChild(li);
+        }
+        document.getElementById("usersinroom").appendChild(ul);
+
+    });
+
+    socketio.on("message_to_client_notleavechat",function(data) {
+        document.getElementById("chatlog").appendChild(document.createElement("hr"));
+        document.getElementById("chatlog").appendChild(document.createTextNode("Someone left"));
+
+        while(document.getElementById("usersinroom").firstChild!=null){
+            document.getElementById("usersinroom").removeChild(document.getElementById("usersinroom").lastChild);
+        }
+        let ul = document.createElement('ul');
+            ul.setAttribute("id", "list");
+            console.log("YOYOYOYOY");
+        for(i=0; i<data["users"].length; i++){
+            console.log(data["users"][i]);
+
+            let li = document.createElement('li');
+            li.setAttribute("id", "bullet");
+            
+            li.appendChild(document.createTextNode(data["users"][i]));
+            ul.appendChild(li);
+        }
+        document.getElementById("usersinroom").appendChild(ul);
+
     });
 
     socketio.on("joinroombtn",function(data) {
@@ -90,6 +159,7 @@ document.getElementById("one").appendChild(document.createTextNode(txt));
     // });
 
       function sendMessage(){
+          console.log("current is " + currentroom);
          var msg = document.getElementById("message_input").value;
          socketio.emit("message_to_server", {message:msg, user:person, name:currentroom});}
 
@@ -104,6 +174,12 @@ document.getElementById("one").appendChild(document.createTextNode(txt));
         socketio.emit("joinroom", {name:newroom, user:person});
         //currentnewroom++;
     }
+
+    function leaveRoom(){
+        socketio.emit("leaveroom", {name:currentroom, user:person});
+        currentroom = "lobby";
+        //currentnewroom++;
+    }
       
 
       </script>
@@ -115,6 +191,10 @@ document.getElementById("one").appendChild(document.createTextNode(txt));
       <input type="text" id="newchatname"/>
       <button onclick="createroom()">create</button>
 
+      <!-- <input type="submit" id="leave"/> -->
+      <!-- <input type='submit' value='leave' id='leave_btn'/> -->
+      <!-- <button onclick="leaveroom()">Return to Lobby</button> -->
+
       <div id="chatlog"></div>
 
       <br>
@@ -123,7 +203,7 @@ document.getElementById("one").appendChild(document.createTextNode(txt));
 
       <div id="usersinroom"> 
             
-        </div>
+    </div>
 
 
       <div id="rooms"> 
