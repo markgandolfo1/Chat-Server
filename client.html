@@ -94,7 +94,7 @@ document.getElementById("one").appendChild(document.createTextNode(txt));
 
         
     });
-    
+    //to show users in lobby pass another variable thats saved before
     socketio.on("message_to_client_leavechat",function(data) {
         document.getElementById("chatlog").appendChild(document.createElement("hr"));
         document.getElementById("chatlog").appendChild(document.createTextNode("You have left the chat room called: " + data['name']));
@@ -102,18 +102,19 @@ document.getElementById("one").appendChild(document.createTextNode(txt));
         while(document.getElementById("usersinroom").firstChild!=null){
             document.getElementById("usersinroom").removeChild(document.getElementById("usersinroom").lastChild);
         }
-        let ul = document.createElement('ul');
-            ul.setAttribute("id", "list");
-        for(i=0; i<data["users"].length; i++){
-            console.log(i);
+        // let ul = document.createElement('ul');
+        //     ul.setAttribute("id", "list");
+        // for(i=0; i<data["users"].length; i++){
+        //     console.log(i);
     
-            let li = document.createElement('li');
-            li.setAttribute("id", "bullet");
+        //     let li = document.createElement('li');
+        //     li.setAttribute("id", "bullet");
             
-            li.appendChild(document.createTextNode(data["users"][i]));
-            ul.appendChild(li);
-        }
-        document.getElementById("usersinroom").appendChild(ul);
+        //     li.appendChild(document.createTextNode(data["users"][i]));
+        //     ul.appendChild(li);
+        // }
+        // document.getElementById("usersinroom").appendChild(ul);
+        document.getElementById("usersinroom").appendChild(document.createTextNode("You are in the lobby"));
 
     });
 
@@ -176,6 +177,7 @@ document.getElementById("one").appendChild(document.createTextNode(txt));
     }
 
     function leaveRoom(){
+
         socketio.emit("leaveroom", {name:currentroom, user:person});
         currentroom = "lobby";
         //currentnewroom++;

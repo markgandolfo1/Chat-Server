@@ -50,14 +50,11 @@ for(i=0; i<currentnewroom; i++){
 	socket.on('message_to_server', function(data) {
 		// This callback runs when the server receives a new message from the client.
 		
-        console.log("sendingroomis" + data["name"]);
 
         if(data["name"]!="lobby"){
-            console.log("should be a private room message")
             io.sockets.in(data["name"]).emit("message_to_client",{message:data['message'], user:data['user']}); 
         }
         else{ 
-            console.log("should be a public room message")
             
 		io.sockets.in("lobby").emit("message_to_client",{message:data["message"], user:data["user"] }) }// broadcast the message to other users
     });
@@ -65,11 +62,9 @@ for(i=0; i<currentnewroom; i++){
     
     
     socket.on('newroom', function(data) {
-        console.log("Creating new room server side");
         socket.leave(socket.room);
         socket.join(data["name"]);
         socket.room = data["name"];
-        console.log("name: "+data["name"]); // log it to the Node.JS output
         // broadcast the message to other users in the new room
         io.sockets.in(data["name"]).emit("message_to_client2",{name:data["name"], message:"A new room called "});
        
@@ -93,7 +88,6 @@ for(i=0; i<currentnewroom; i++){
 	});
 
     socket.on('joinroom', function(data) {
-        console.log("joinroom");
         socket.leave(socket.room);
         socket.join(data["name"]);
         socket.room = data["name"];
@@ -113,10 +107,18 @@ for(i=0; i<currentnewroom; i++){
         socket.join("lobby");
         for(i=0; i<currentnewroom; i++){
             if(rooms[i].roomName==data["name"] && data["user"]!=null){
-                rooms[i].users.splice(i,1);
-                io.sockets.in("lobby").emit("message_to_client_leavechat",{name:data["name"], users:rooms[i].users});
+                //leaver = rooms[i].users[i];
+                leaver = data["user"];
+                l = rooms[i].users.indexOf(leaver);
+                console.log(l);
+                console.log(leaver + " has left " + rooms[i].roomName);
                 for(j=0;j<rooms[i].users.length; j++){
-                    console.log("users are " + rooms[i].users[j]);
+                    console.log("users are BEFORE leave: " + rooms[i].users[j]);
+                }
+                rooms[i].users.splice(l,1);
+                io.sockets.in("lobby").emit("message_to_client_leavechat",{name:data["name"], users:rooms[i].users, leaver:leaver});
+                for(j=0;j<rooms[i].users.length; j++){
+                    console.log("users are AFTER leave: " + rooms[i].users[j]);
                 }
                 io.sockets.in(data["name"]).emit("message_to_client_notleavechat",{name:data["name"], users:rooms[i].users});
 
