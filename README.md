@@ -3,7 +3,7 @@
 
 464251
 
-Users initially join a "lobby". Private messaging is only allowed when users are in the same room, and it is not allowed in the lobby. General messaging is allowed in the lobby.
+Users initially join a "lobby". Private messaging is only allowed when users are in the same room, and it is not allowed in the lobby. General messaging is allowed in the lobby. New users can not initially see who is in the lobby. Once they have joined a group, they can see who is in the room.
 
 Creative Portion:
 
