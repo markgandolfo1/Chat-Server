@@ -79,7 +79,15 @@ for(i=0; i<currentnewroom; i++){
         console.log("size" + v)
         let receiverid = socketmap.get(data["receiver"]);
         console.log("id" + receiverid);
-        io.sockets.to(receiverid).emit("message_to_client",{message:"hi", user:data['sender']}); 
+        for(i=0;i<currentnewroom;i++){
+            for(j=0;j<rooms[i].users.length;j++){
+                if(rooms[i].users[j]==data["receiver"]){
+                    if(rooms[i].roomName==data["name"]){
+                        io.sockets.to(receiverid).emit("message_to_client",{message:data["message"], user:data['sender']}); 
+                    }
+                }
+            }
+        }
         
           }// broadcast the message to other users
     );

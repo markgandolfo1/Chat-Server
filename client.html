@@ -176,7 +176,7 @@ var btncount=0;
 
          var receiver = document.getElementById("privatemessage_input").value;
          if(receiver!=''){
-            socketio.emit("privatemessage_to_server", {receiver:receiver, sender:person, name:currentroom});
+            socketio.emit("privatemessage_to_server", {message:msg, receiver:receiver, sender:person, name:currentroom});
          }
          //console.log("log:" + receiver);
          else{
