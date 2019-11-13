@@ -195,6 +195,66 @@ var btncount=0;
           console.log("current is " + currentroom);
          var msg = document.getElementById("message_input").value;
 
+//CREATIVE
+let newmsg = '';
+spellcheck('brb','be right back');
+spellcheck('omw','on my way');
+spellcheck('smh','shaking my head');
+spellcheck('np','no problem');
+spellcheck('ttyl','talk to you later');
+
+    function spellcheck(short, full){
+        newmsg = '';
+    if(msg == short){
+    msg = full;
+}
+
+if(msg == short + '.'){
+    msg = full + '.';
+}
+
+else {if(msg.includes(' ' + short + '.') && !msg.includes(' ' + short)){
+           let index = msg.indexOf(' ' + short + '.');
+            let split = msg.split(' ' + short + '.');
+            for(i=0;i<split.length-1;i++){
+                newmsg = newmsg + split[i] + ' ' + full + '.';
+            }
+            newmsg = newmsg + split[split.length-1];
+            msg = newmsg;
+        }
+
+        if(msg.includes(' ' + short) && !msg.includes(' ' + short + ' ')){
+           let index = msg.indexOf(' ' + short);
+            let split = msg.split(' ' + short);
+            for(i=0;i<split.length-1;i++){
+                newmsg = newmsg + split[i] + ' ' + full;
+            }
+            newmsg = newmsg + split[split.length-1];
+            msg = newmsg;
+        }
+
+        else if(msg.includes(' ' + short + ' ')){
+           let index = msg.indexOf(' ' + short + ' ');
+            let split = msg.split(' ' + short + ' ');
+            for(i=0;i<split.length-1;i++){
+                newmsg = newmsg + split[i] + ' ' + full + ' ';
+            }
+            newmsg = newmsg + split[split.length-1];
+            msg = newmsg;
+        }
+
+        if(msg.includes(short + ' ')){
+           let index = msg.indexOf(short + ' ');
+            let split = msg.split(short + ' ');
+            for(i=0;i<split.length-1;i++){
+                newmsg = newmsg + split[i] + full + ' ';
+            }
+            newmsg = newmsg + split[split.length-1];
+            msg = newmsg;
+        }
+    }
+    }
+
          var receiver = document.getElementById("privatemessage_input").value;
          if(receiver!=''){
             socketio.emit("privatemessage_to_server", {message:msg, receiver:receiver, sender:person, name:currentroom});
