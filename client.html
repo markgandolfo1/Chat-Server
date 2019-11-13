@@ -6,7 +6,17 @@
 
       </div>
 
+
+      <input type="text" id="message_input" placeholder="Message"/>
+      <button onclick="sendMessage()">Send</button>
+
+      <input type="text" id="newchatname" placeholder="Group Name"/>
+      <button onclick="createroom()">Create New Group</button>
+
       <input type='submit' value='Leave Room' id='leave_btn'/>
+
+      <input type="text" id="privatemessage_input" placeholder="Nickname for Private Message (optional)"/>
+      <!-- <button onclick="privatemessage()"> Send Private Message</button> -->
 
       <script type ="text/javascript">
 
@@ -14,12 +24,6 @@
 
 
 document.getElementById("leave_btn").addEventListener("click", leaveRoom, false);
-
-// let room = {
-//     roomName: "room",
-//     users: [],
-//     creator: "ron"
-// };
 
 
 let txt;
@@ -29,23 +33,14 @@ let txt;
   } else {
     txt = "Hello " + person + "! You have joined.";
   }
-//   document.getElementById("demo").innerHTML = txt;
-// alert("hi");
+
 document.getElementById("one").appendChild(document.createTextNode(txt));
       var socketio = io.connect();
         var currentroom = "lobby";
         var newroom = [];
         var currentnewroom = 0;
-// socketio.emit("message_to_server", {name:currentroom});
 
-// for(i=0; i<currentnewroom; i++){
-//     let join_btn = document.createElement("button");
-//         join_btn.setAttribute("id", newroom);
-//         join_btn.setAttribute("value", newroom);
-//         join_btn.appendChild(document.createTextNode("Join " + newroom));
-//         document.getElementById("rooms").appendChild(join_btn);
-//         join_btn.addEventListener('click', joinRoom, false);
-// }
+newconnect();
 
       socketio.on("message_to_client",function(data) {
          //Append an HR thematic break and the escaped HTML of the new message
@@ -162,7 +157,22 @@ document.getElementById("one").appendChild(document.createTextNode(txt));
       function sendMessage(){
           console.log("current is " + currentroom);
          var msg = document.getElementById("message_input").value;
-         socketio.emit("message_to_server", {message:msg, user:person, name:currentroom});}
+
+         var receiver = document.getElementById("privatemessage_input").value;
+         if(receiver!=''){
+            socketio.emit("privatemessage_to_server", {receiver:receiver, sender:person, name:currentroom});
+         }
+         //console.log("log:" + receiver);
+         else{
+         socketio.emit("message_to_server", {message:msg, user:person, name:currentroom});}}
+
+         function newconnect(){
+         socketio.emit("newConnection", {user:person});}
+
+        //  function privatemessage(){
+        //  var receiver = document.getElementById("privatemessage_input").value;
+        //  console.log("receiver is: " + receiver);
+        //  socketio.emit("privatemessage_to_server", {receiver:receiver, sender:person, name:currentroom});}
 
 
       function createroom(){
@@ -187,20 +197,12 @@ document.getElementById("one").appendChild(document.createTextNode(txt));
       </script>
    </head>
    <body>
-      <input type="text" id="message_input"/>
-      <button onclick="sendMessage()">send</button>
-
-      <input type="text" id="newchatname"/>
-      <button onclick="createroom()">create</button>
-
-      <!-- <input type="submit" id="leave"/> -->
-      <!-- <input type='submit' value='leave' id='leave_btn'/> -->
-      <!-- <button onclick="leaveroom()">Return to Lobby</button> -->
+      
 
       <div id="chatlog"></div>
 
       <br>
-      Users in your room:  
+      Users in your room:
       <br>
 
       <div id="usersinroom"> 

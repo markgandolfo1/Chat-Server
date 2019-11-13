@@ -26,6 +26,13 @@ var app = http.createServer(function(req, resp){
 app.listen(3456);
 
 let users = [];
+let socketarray = [];
+let count = 0;
+let socketmap = new Map();
+
+// function getId(value, key, map){
+// return value;
+// }
 
 
 // Do the Socket.IO magic:
@@ -34,6 +41,8 @@ io.sockets.on("connection", function(socket){
     // This callback runs when a new Socket.IO connection is established.
     socket.room = "lobby";
     socket.join("lobby");
+    //socket.privateroom = "lobby";
+
 
 for(i=0; i<currentnewroom; i++){
 
@@ -42,8 +51,15 @@ for(i=0; i<currentnewroom; i++){
 
 }
 
-    socket.on("newConnection", function(username) {
+    socket.on("newConnection", function(data) {
+        // socket.leave(socket.privateroom);
+        // socket.join();
 
+        socketmap.set(data["user"], socket.id);
+        // let f = socketmap.get(data["user"]);
+        // console.log(f);
+
+        //socketarray[count] = new Map([[data["user"], socket.id]]);
         // save new user to some collection to keep track
     });
     
@@ -59,12 +75,27 @@ for(i=0; i<currentnewroom; i++){
 		io.sockets.in("lobby").emit("message_to_client",{message:data["message"], user:data["user"] }) }// broadcast the message to other users
     });
 
+    socket.on('privatemessage_to_server', function(data) {
+        //if(data["receiver"] = socketmap.forEach(getId);
+        
+        //socketmap.forEach(getId);
+        console.log(data["receiver"]);
+        let v = socketmap.size;
+        console.log("size" + v)
+        let receiverid = socketmap.get(data["receiver"]);
+        console.log("id" + receiverid);
+        io.sockets.to(receiverid).emit("message_to_client",{message:"hi", user:data['sender']}); 
+        
+          }// broadcast the message to other users
+    );
+
     
     
     socket.on('newroom', function(data) {
         socket.leave(socket.room);
         socket.join(data["name"]);
         socket.room = data["name"];
+        
         // broadcast the message to other users in the new room
         io.sockets.in(data["name"]).emit("message_to_client2",{name:data["name"], message:"A new room called "});
        
