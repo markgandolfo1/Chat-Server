@@ -11,6 +11,8 @@
       <button onclick="sendMessage()">Send</button>
 
       <input type="text" id="newchatname" placeholder="Group Name"/>
+      <input type="text" id="password" placeholder="Password(optional)"/>
+
       <button onclick="createroom()">Create New Group</button>
 
       <input type='submit' value='Leave Room' id='leave_btn'/>
@@ -135,16 +137,30 @@ newconnect();
         document.getElementById("usersinroom").appendChild(ul);
 
     });
-
+   
+    socketio.on("wrong", function(data) {
+        alert("wrong");
+    });
+var btncount=0;
     socketio.on("joinroombtn",function(data) {
         let join_btn = document.createElement("button");
+        console.log("BOOL" + data["bool"]);
         join_btn.setAttribute("id", data['name']);
-        join_btn.setAttribute("value", data['name']);
+        if(data["bool"]){
+            join_btn.setAttribute("value", "pass");
+        }
+        else{
+            join_btn.setAttribute("value", "nopass");
+        }
+        console.log("VAL" + join_btn.value);
+        //join_btn.setAttribute("value", data['name']);
         join_btn.appendChild(document.createTextNode("Join " + data['name']));
         document.getElementById("rooms").appendChild(join_btn);
-        newroom = data['name'];
-        join_btn.addEventListener('click', joinRoom, false);
+        newroom.push(data['name']);
 
+        join_btn.addEventListener('click', joinRoom, false);
+        join_btn.index = btncount;
+        btncount++;
     });
 
     // socketio.on("addexistingroom",function(data) {
@@ -178,11 +194,20 @@ newconnect();
       function createroom(){
           var createroomname = document.getElementById("newchatname").value;
           console.log("New room created: " + createroomname);
-          socketio.emit("newroom", {name:createroomname, creator:person});
+          socketio.emit("newroom", {name:createroomname, creator:person, pass:document.getElementById("password").value});
       }
 
-      function joinRoom(){
-        socketio.emit("joinroom", {name:newroom, user:person});
+      function joinRoom(index){
+        var guess = '';
+
+        if(document.getElementById(newroom[index.currentTarget.index]).value=="pass"){
+
+            // used https://www.w3schools.com/js/tryit.asp?filename=tryjs_prompt for popup below
+
+            guess = prompt("This room is password protected", "???");
+        }
+
+        socketio.emit("joinroom", {name:newroom[index.currentTarget.index], user:person, guess:guess});
         //currentnewroom++;
     }
 

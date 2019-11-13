@@ -5,11 +5,6 @@ var http = require("http"),
 
 let rooms = [];
 let currentnewroom = 0;
-// let room = {
-//     roomName: "room",
-//     users: [],
-//     creator: "ron"
-// };
 
 // Listen for HTTP connections.  This is essentially a miniature static file server that only serves our one file, client.html:
 var app = http.createServer(function(req, resp){
@@ -46,7 +41,7 @@ io.sockets.on("connection", function(socket){
 
 for(i=0; i<currentnewroom; i++){
 
-    io.sockets.in("lobby").emit("joinroombtn",{name:rooms[i].roomName});
+    io.sockets.in("lobby").emit("joinroombtn",{name:rooms[i].roomName, pass:rooms[i].password, bool:rooms[i].bool});
     //io.sockets.in("lobby").emit("joinroombtn",{name:rooms[i]});
 
 }
@@ -104,9 +99,23 @@ for(i=0; i<currentnewroom; i++){
         rooms[currentnewroom].users = [data["creator"]];
         //rooms[currentnewroom].users.push(data["creator"]);
         rooms[currentnewroom].creator = data["creator"];
+        rooms[currentnewroom].password = data["pass"];
+        
+        rooms[currentnewroom].index = currentnewroom;
+
+var bool = false;
+
+console.log("PASS" + rooms[currentnewroom].password);
+if(rooms[currentnewroom].password!=''){
+bool=true;
+}
+rooms[currentnewroom].bool = bool;
+
+
+io.sockets.emit("joinroombtn",{name:data["name"], bool:bool});
         currentnewroom++;
        
-        io.sockets.in("lobby").emit("joinroombtn",{name:data["name"]});
+        
         //console.log("#: " + rooms[currentnewroom].users.length);
        //******** */
         //io.sockets.in(data["name"]).emit("message_to_client3",{name:data["name"], users:data["creator"]});
@@ -119,17 +128,48 @@ for(i=0; i<currentnewroom; i++){
 	});
 
     socket.on('joinroom', function(data) {
-        socket.leave(socket.room);
-        socket.join(data["name"]);
-        socket.room = data["name"];
-        //io.sockets.in(data["name"]).emit("message_to_client3",{name:data["name"]})
-        for(i=0; i<currentnewroom; i++){
-            if(rooms[i].roomName==data["name"] && data["user"]!=null){
-                console.log(data["user"] + " joined " + data["name"])
-                rooms[i].users.push(data["user"]);
-                io.sockets.in(data["name"]).emit("message_to_client3",{name:data["name"], users:rooms[i].users});
+
+for(i=0; i<currentnewroom; i++){
+    if(rooms[i].roomName==data["name"]){
+        if(rooms[i].password!=''){
+            guess = data["guess"];
+            if(guess == rooms[i].password){
+                socket.leave(socket.room);
+                socket.join(data["name"]);
+                socket.room = data["name"];
+                for(i=0; i<currentnewroom; i++){
+                    if(rooms[i].roomName==data["name"] && data["user"]!=null){
+                        console.log(data["user"] + " joined " + data["name"])
+                        rooms[i].users.push(data["user"]);
+                        io.sockets.in(data["name"]).emit("message_to_client3",{name:data["name"], users:rooms[i].users});
+                    }
+                }
+            }
+            else{
+                io.sockets.in(data["user"]).emit("wrong",{users:rooms[i].users});
             }
         }
+        else{
+            socket.leave(socket.room);
+                socket.join(data["name"]);
+                socket.room = data["name"];
+                for(i=0; i<currentnewroom; i++){
+                    if(rooms[i].roomName==data["name"] && data["user"]!=null){
+                        console.log(data["user"] + " joined " + data["name"])
+                        rooms[i].users.push(data["user"]);
+                        io.sockets.in(data["name"]).emit("message_to_client3",{name:data["name"], users:rooms[i].users});
+                    }
+                }
+        }
+    }
+}
+
+
+
+
+        
+        //io.sockets.in(data["name"]).emit("message_to_client3",{name:data["name"]})
+        
 
     });
 
