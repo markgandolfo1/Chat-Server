@@ -92,8 +92,19 @@ for(i=0; i<currentnewroom; i++){
           }// broadcast the message to other users
     );
 
+    socket.on('kickmessage_to_server', function(data) {
+        for(i=0;i<currentnewroom;i++){
+            if(rooms[i].roomName==data["name"]){
+                if(data["sender"]==rooms[i].creator){
+                    let kickedid = socketmap.get(data["receiver"]);
+                    io.sockets.to(kickedid).emit("forcequitmessage_to_client",{name:data["name"], user:data['receiver']}); 
+                }
+            }
+        }
     
-    
+
+    });
+
     socket.on('newroom', function(data) {
         socket.leave(socket.room);
         socket.join(data["name"]);
@@ -182,7 +193,7 @@ for(i=0; i<currentnewroom; i++){
     });
 
     socket.on('leaveroom', function(data) {
-        socket.leave(socket.room);
+        socket.leave(data["name"]);
         socket.join("lobby");
         for(i=0; i<currentnewroom; i++){
             if(rooms[i].roomName==data["name"] && data["user"]!=null){
@@ -205,4 +216,36 @@ for(i=0; i<currentnewroom; i++){
         }
 
     });
+
+    socket.on('kickleaveroom', function(data) {
+
+        let kickid = socketmap.get(data["user"]);
+        console.log("id..." + data["user"]);
+        console.log(kickid);
+        console.log(socket.id);
+        socket.leave(data["name"]);
+        
+        socket.join("lobby");
+        for(i=0; i<currentnewroom; i++){
+            if(rooms[i].roomName==data["name"] && data["user"]!=null){
+                //leaver = rooms[i].users[i];
+                leaver = data["user"];
+                l = rooms[i].users.indexOf(leaver);
+                console.log(l);
+                console.log(leaver + " has left " + rooms[i].roomName);
+                for(j=0;j<rooms[i].users.length; j++){
+                    console.log("users are BEFORE leave: " + rooms[i].users[j]);
+                }
+                rooms[i].users.splice(l,1);
+                io.sockets.in("lobby").emit("message_to_client_leavechat",{name:data["name"], users:rooms[i].users, leaver:leaver});
+                for(j=0;j<rooms[i].users.length; j++){
+                    console.log("users are AFTER leave: " + rooms[i].users[j]);
+                }
+                io.sockets.in(data["name"]).emit("message_to_client_notleavechat",{name:data["name"], users:rooms[i].users});
+
+            }
+        }
+
+    });
+
 });

@@ -17,7 +17,12 @@
 
       <input type='submit' value='Leave Room' id='leave_btn'/>
 
-      <input type="text" id="privatemessage_input" placeholder="Nickname for Private Message (optional)"/>
+      <input type="text" id="privatemessage_input" placeholder="Nickname(optional)"/>
+
+      <input type="text" id="kickuser_input" placeholder="Nickname(optional)"/>
+      <button onclick="kickuser()">Kick User</button>
+
+
       <!-- <button onclick="privatemessage()"> Send Private Message</button> -->
 
       <script type ="text/javascript">
@@ -91,6 +96,12 @@ newconnect();
 
         
     });
+
+    socketio.on("forcequitmessage_to_client",function(data) {
+
+        socketio.emit("kickleaveroom", {name:data["name"],user:data["user"]});
+
+});
     //to show users in lobby pass another variable thats saved before
     socketio.on("message_to_client_leavechat",function(data) {
         document.getElementById("chatlog").appendChild(document.createElement("hr"));
@@ -112,6 +123,7 @@ newconnect();
         // }
         // document.getElementById("usersinroom").appendChild(ul);
         document.getElementById("usersinroom").appendChild(document.createTextNode("You are in the lobby"));
+        currentroom = "lobby";
 
     });
 
@@ -190,6 +202,10 @@ var btncount=0;
         //  console.log("receiver is: " + receiver);
         //  socketio.emit("privatemessage_to_server", {receiver:receiver, sender:person, name:currentroom});}
 
+        function kickuser(){
+            let receiver = document.getElementById("kickuser_input").value; 
+            socketio.emit("kickmessage_to_server", {receiver:receiver, sender:person, name:currentroom});
+        }
 
       function createroom(){
           var createroomname = document.getElementById("newchatname").value;
