@@ -119,10 +119,13 @@ for(i=0; i<currentnewroom; i++){
         //rooms[currentnewroom].users.push(data["creator"]);
         rooms[currentnewroom].creator = data["creator"];
         rooms[currentnewroom].password = data["pass"];
+        rooms[currentnewroom].banned = [];
+
         
         rooms[currentnewroom].index = currentnewroom;
 
 var bool = false;
+
 
 console.log("PASS" + rooms[currentnewroom].password);
 if(rooms[currentnewroom].password!=''){
@@ -146,13 +149,49 @@ io.sockets.emit("joinroombtn",{name:data["name"], bool:bool});
         
 	});
 
-    socket.on('joinroom', function(data) {
+    socket.on('banmessage_to_server', function(data) {
+        for(i=0;i<currentnewroom;i++){
+            if(rooms[i].roomName==data["name"]){
+                if(data["sender"]==rooms[i].creator){
+                    let kickedid = socketmap.get(data["receiver"]);
+                    rooms[i].banned.push(data["receiver"]);
+                    io.sockets.to(kickedid).emit("forcequitmessage_to_client",{name:data["name"], user:data["receiver"]});
+                }
+            }
+        }
+    
 
+    });
+
+
+socket.on('joinroom', function(data) {
+    let isbanned = false;
 for(i=0; i<currentnewroom; i++){
     if(rooms[i].roomName==data["name"]){
+        console.log("PASSWORD IS THIS MOSES"+rooms[i].password);
         if(rooms[i].password!=''){
+            
             guess = data["guess"];
+
             if(guess == rooms[i].password){
+
+                for(k=0;k<rooms[i].banned.length;k++){
+                    if(rooms[i].banned[k]==data["user"]){
+                    console.log("banned");
+                    isbanned = true;
+                    //io.sockets.in(data["user"]).emit("yourebannedmessage_to_client",{user:data["user"]}); 
+                }
+                }
+
+
+                
+                // if(rooms[i].banned[k]==data["user"]){
+                //     console.log("banned");
+                //     io.sockets.in(data["user"]).emit("yourebannedmessage_to_client",{user:data["user"]}); 
+                // }
+              //  else{
+
+                if(!isbanned){
                 socket.leave(socket.room);
                 socket.join(data["name"]);
                 socket.room = data["name"];
@@ -163,12 +202,23 @@ for(i=0; i<currentnewroom; i++){
                         io.sockets.in(data["name"]).emit("message_to_client3",{name:data["name"], users:rooms[i].users});
                     }
                 }
+           // }
+            
             }
+        }
             else{
                 io.sockets.in(data["user"]).emit("wrong",{users:rooms[i].users});
             }
         }
         else{
+            for(k=0;k<rooms[i].banned.length;k++){
+                if(rooms[i].banned[k]==data["user"]){
+                console.log("banned");
+                isbanned = true;
+                //io.sockets.in(data["user"]).emit("yourebannedmessage_to_client",{user:data["user"]}); 
+            }
+            }
+            if(!isbanned){
             socket.leave(socket.room);
                 socket.join(data["name"]);
                 socket.room = data["name"];
@@ -179,7 +229,9 @@ for(i=0; i<currentnewroom; i++){
                         io.sockets.in(data["name"]).emit("message_to_client3",{name:data["name"], users:rooms[i].users});
                     }
                 }
+            }
         }
+        
     }
 }
 

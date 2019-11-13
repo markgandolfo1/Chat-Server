@@ -21,6 +21,7 @@
 
       <input type="text" id="kickuser_input" placeholder="Nickname(optional)"/>
       <button onclick="kickuser()">Kick User</button>
+      <button onclick="banuser()">Ban User</button>
 
 
       <!-- <button onclick="privatemessage()"> Send Private Message</button> -->
@@ -110,18 +111,7 @@ newconnect();
         while(document.getElementById("usersinroom").firstChild!=null){
             document.getElementById("usersinroom").removeChild(document.getElementById("usersinroom").lastChild);
         }
-        // let ul = document.createElement('ul');
-        //     ul.setAttribute("id", "list");
-        // for(i=0; i<data["users"].length; i++){
-        //     console.log(i);
-    
-        //     let li = document.createElement('li');
-        //     li.setAttribute("id", "bullet");
-            
-        //     li.appendChild(document.createTextNode(data["users"][i]));
-        //     ul.appendChild(li);
-        // }
-        // document.getElementById("usersinroom").appendChild(ul);
+
         document.getElementById("usersinroom").appendChild(document.createTextNode("You are in the lobby"));
         currentroom = "lobby";
 
@@ -205,6 +195,11 @@ var btncount=0;
         function kickuser(){
             let receiver = document.getElementById("kickuser_input").value; 
             socketio.emit("kickmessage_to_server", {receiver:receiver, sender:person, name:currentroom});
+        }
+
+        function banuser(){
+            let receiver = document.getElementById("kickuser_input").value; 
+            socketio.emit("banmessage_to_server", {receiver:receiver, sender:person, name:currentroom});
         }
 
       function createroom(){
