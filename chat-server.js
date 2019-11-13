@@ -141,7 +141,7 @@ io.sockets.emit("joinroombtn",{name:data["name"], bool:bool});
         //console.log("#: " + rooms[currentnewroom].users.length);
        //******** */
         //io.sockets.in(data["name"]).emit("message_to_client3",{name:data["name"], users:data["creator"]});
-        io.sockets.in(data["name"]).emit("message_to_client3",{name:data["name"], users:[data["creator"]]});
+        io.sockets.in(data["name"]).emit("message_to_client3",{name:data["name"],user:data['creator'], users:[data["creator"]]});
 
         // rooms[currentnewroom] = data["name"];
         // currentnewroom++;
@@ -150,6 +150,7 @@ io.sockets.emit("joinroombtn",{name:data["name"], bool:bool});
 	});
 
     socket.on('banmessage_to_server', function(data) {
+        
         for(i=0;i<currentnewroom;i++){
             if(rooms[i].roomName==data["name"]){
                 if(data["sender"]==rooms[i].creator){
@@ -159,9 +160,28 @@ io.sockets.emit("joinroombtn",{name:data["name"], bool:bool});
                 }
             }
         }
-    
+        if(isNaN(data['time'])==false){
+            let millisecond = data['time']*60000;
+            console.log("time taken"+millisecond);
+            //https://www.w3schools.com/js/js_timing.asp
+            setTimeout(unban, millisecond);
+
+        }
+    function unban(){
+        console.log("ssssssssssssssssssaRONRONRONRONRONR");
+        for(i=0; i<currentnewroom; i++){
+            if(rooms[i].roomName==data["name"]){
+                for(k=0;k<rooms[i].banned.length;k++){
+                    if(rooms[i].banned[k]==data['receiver']){
+                        rooms[i].banned.splice(k,1);
+                    }
+                }
+            }
+    }
+}
 
     });
+
 
 
 socket.on('joinroom', function(data) {
@@ -199,7 +219,7 @@ for(i=0; i<currentnewroom; i++){
                     if(rooms[i].roomName==data["name"] && data["user"]!=null){
                         console.log(data["user"] + " joined " + data["name"])
                         rooms[i].users.push(data["user"]);
-                        io.sockets.in(data["name"]).emit("message_to_client3",{name:data["name"], users:rooms[i].users});
+                        io.sockets.in(data["name"]).emit("message_to_client3",{name:data["name"], user:data['creator'], users:rooms[i].users});
                     }
                 }
            // }
@@ -226,7 +246,7 @@ for(i=0; i<currentnewroom; i++){
                     if(rooms[i].roomName==data["name"] && data["user"]!=null){
                         console.log(data["user"] + " joined " + data["name"])
                         rooms[i].users.push(data["user"]);
-                        io.sockets.in(data["name"]).emit("message_to_client3",{name:data["name"], users:rooms[i].users});
+                        io.sockets.in(data["name"]).emit("message_to_client3",{name:data["name"], user:data['creator'], users:rooms[i].users});
                     }
                 }
             }
